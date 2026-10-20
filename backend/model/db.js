@@ -1,0 +1,48 @@
+const Database = require('better-sqlite3');
+const path = require('path');
+const fs = require('fs');
+require('dotenv').config();
+
+const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'data', 'khatabook.db');
+const dbDir = path.dirname(path.resolve(dbPath));
+
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+const db = new Database(path.resolve(dbPath), {
+  // verbose: process.env.NODE_ENV === 'development' ? console.log : null,
+});
+
+// Architecture Pillar 28: SQLite optimizations
+db.pragma('journal_mode = WAL');
+db.pragma('synchronous = NORMAL');
+db.pragma('foreign_keys = ON');
+
+// Schema initialization
+const initSchema = () => {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS transactions (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      amount REAL NOT NULL CHECK(amount > 0),
+      type TEXT NOT NULL CHECK(type IN ('INCOME', 'EXPENSE')),
+      category TEXT NOT NULL,
+      paymentMode TEXT NOT NULL DEFAULT 'Cash',
+      date TEXT NOT NULL,
+      notes TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Architecture Pillar 25: Composite & Equality indexes for high performance queries
+    CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions (date DESC);
+    CREATE INDEX IF NOT EXISTS idx_transactions_type_date ON transactions (type, date);
+    CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions (category);
+    CREATE INDEX IF NOT EXISTS idx_transactions_month ON transactions (strftime('%Y-%m', date));
+  `);
+};
+
+initSchema();
+
+module.exports = db;
