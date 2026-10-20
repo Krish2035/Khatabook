@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { TransactionProvider, useTransactions } from './context/TransactionContext';
 import Navbar from './components/common/Navbar';
@@ -12,6 +12,7 @@ import MonthCompareView from './components/comparison/MonthCompareView';
 import TransactionList from './components/transactions/TransactionList';
 import TransactionFormModal from './components/transactions/TransactionFormModal';
 import AuthModal from './components/auth/AuthModal';
+import AuthPage from './components/auth/AuthPage';
 import {
   TrendingUp,
   TrendingDown,
@@ -205,14 +206,26 @@ const DashboardContent = () => {
   );
 };
 
+const MainApp = () => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <AuthPage />;
+  }
+
+  return (
+    <CurrencyProvider>
+      <TransactionProvider>
+        <DashboardContent />
+      </TransactionProvider>
+    </CurrencyProvider>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
-      <CurrencyProvider>
-        <TransactionProvider>
-          <DashboardContent />
-        </TransactionProvider>
-      </CurrencyProvider>
+      <MainApp />
     </AuthProvider>
   );
 }

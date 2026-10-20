@@ -80,6 +80,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginAsGuest = () => {
+    const guestUser = {
+      id: 9999,
+      name: 'Guest User',
+      email: 'guest@khatabook.local',
+      authProvider: 'guest',
+    };
+    saveAuthSession(guestUser, 'guest-demo-token');
+    return guestUser;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -90,6 +101,7 @@ export const AuthProvider = ({ children }) => {
         signupWithEmail,
         loginWithEmail,
         loginWithGoogle,
+        loginAsGuest,
         logout,
       }}
     >
