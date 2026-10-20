@@ -25,9 +25,8 @@ const Navbar = ({ activeTab, setActiveTab, onOpenAddModal }) => {
     <header
       className="glass-card navbar-container"
       style={{
-        position: 'sticky',
-        top: '0.75rem',
-        zIndex: 100,
+        position: 'relative',
+        zIndex: 10,
         marginBottom: '1.5rem',
         padding: '0.85rem 1.25rem',
         borderRadius: 'var(--radius-md)',
