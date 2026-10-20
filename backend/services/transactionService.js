@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const transactionModel = require('../model/transactionModel');
 
 const transactionService = {
-  createTransaction: (data, userId = null) => {
+  createTransaction: async (data, userId = null) => {
     const transaction = {
       id: uuidv4(),
       userId: data.userId || userId || null,
@@ -15,11 +15,11 @@ const transactionService = {
       notes: data.notes || ''
     };
 
-    return transactionModel.create(transaction);
+    return await transactionModel.create(transaction);
   },
 
-  getTransactionById: (id, userId = null) => {
-    const transaction = transactionModel.findById(id);
+  getTransactionById: async (id, userId = null) => {
+    const transaction = await transactionModel.findById(id);
     if (!transaction) {
       const err = new Error(`Transaction with ID '${id}' not found`);
       err.statusCode = 404;
@@ -28,7 +28,7 @@ const transactionService = {
     return transaction;
   },
 
-  getTransactions: ({ userId, month, year, type, category, search, page = 1, limit = 50, sortBy, sortOrder }) => {
+  getTransactions: async ({ userId, month, year, type, category, search, page = 1, limit = 50, sortBy, sortOrder }) => {
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
     const offset = (pageNum - 1) * limitNum;
@@ -46,8 +46,8 @@ const transactionService = {
       sortOrder
     };
 
-    const items = transactionModel.findAll(filterOptions);
-    const totalCount = transactionModel.count({ userId, month, year, type, category, search });
+    const items = await transactionModel.findAll(filterOptions);
+    const totalCount = await transactionModel.count({ userId, month, year, type, category, search });
     const totalPages = Math.ceil(totalCount / limitNum);
 
     return {
@@ -63,9 +63,8 @@ const transactionService = {
     };
   },
 
-  updateTransaction: (id, updates, userId = null) => {
-    // Check if exists
-    transactionService.getTransactionById(id, userId);
+  updateTransaction: async (id, updates, userId = null) => {
+    await transactionService.getTransactionById(id, userId);
 
     const safeUpdates = {};
     if (updates.title !== undefined) safeUpdates.title = updates.title;
@@ -76,21 +75,19 @@ const transactionService = {
     if (updates.date !== undefined) safeUpdates.date = updates.date;
     if (updates.notes !== undefined) safeUpdates.notes = updates.notes;
 
-    return transactionModel.update(id, safeUpdates, userId);
+    return await transactionModel.update(id, safeUpdates, userId);
   },
 
-  deleteTransaction: (id, userId = null) => {
-    // Check if exists
-    transactionService.getTransactionById(id, userId);
-    return transactionModel.delete(id, userId);
+  deleteTransaction: async (id, userId = null) => {
+    await transactionService.getTransactionById(id, userId);
+    return await transactionModel.delete(id, userId);
   },
 
-  syncBatch: (operations, userId = null) => {
+  syncBatch: async (operations, userId = null) => {
     if (!Array.isArray(operations) || operations.length === 0) {
       return { created: 0, updated: 0, deleted: 0, total: 0 };
     }
 
-    // Validate and sanitize each operation
     const sanitizedOps = operations.map((op) => {
       if (!op.action || !['CREATE', 'UPDATE', 'DELETE'].includes(op.action)) {
         throw new Error(`Invalid sync action '${op.action}'`);
@@ -104,7 +101,7 @@ const transactionService = {
       return op;
     });
 
-    return transactionModel.syncBatch(sanitizedOps, userId);
+    return await transactionModel.syncBatch(sanitizedOps, userId);
   }
 };
 

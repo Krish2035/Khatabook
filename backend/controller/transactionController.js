@@ -3,7 +3,7 @@ const transactionService = require('../services/transactionService');
 const transactionController = {
   create: async (req, res, next) => {
     try {
-      const transaction = transactionService.createTransaction(req.body, req.userId);
+      const transaction = await transactionService.createTransaction(req.body, req.userId);
       res.status(201).json({
         success: true,
         message: 'Transaction recorded successfully',
@@ -17,7 +17,7 @@ const transactionController = {
   getAll: async (req, res, next) => {
     try {
       const { month, year, type, category, search, page, limit, sortBy, sortOrder } = req.query;
-      const result = transactionService.getTransactions({
+      const result = await transactionService.getTransactions({
         userId: req.userId,
         month,
         year,
@@ -41,7 +41,7 @@ const transactionController = {
 
   getById: async (req, res, next) => {
     try {
-      const transaction = transactionService.getTransactionById(req.params.id, req.userId);
+      const transaction = await transactionService.getTransactionById(req.params.id, req.userId);
       res.status(200).json({
         success: true,
         data: transaction
@@ -53,7 +53,7 @@ const transactionController = {
 
   update: async (req, res, next) => {
     try {
-      const updated = transactionService.updateTransaction(req.params.id, req.body, req.userId);
+      const updated = await transactionService.updateTransaction(req.params.id, req.body, req.userId);
       res.status(200).json({
         success: true,
         message: 'Transaction updated successfully',
@@ -66,7 +66,7 @@ const transactionController = {
 
   delete: async (req, res, next) => {
     try {
-      transactionService.deleteTransaction(req.params.id, req.userId);
+      await transactionService.deleteTransaction(req.params.id, req.userId);
       res.status(200).json({
         success: true,
         message: 'Transaction deleted successfully'
@@ -79,7 +79,7 @@ const transactionController = {
   syncBatch: async (req, res, next) => {
     try {
       const { operations } = req.body;
-      const result = transactionService.syncBatch(operations, req.userId);
+      const result = await transactionService.syncBatch(operations, req.userId);
       res.status(200).json({
         success: true,
         message: `Successfully synchronized ${result.total} transactions`,

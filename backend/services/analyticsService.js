@@ -6,10 +6,10 @@ const MONTH_NAMES = [
 ];
 
 const analyticsService = {
-  getMonthlySummary: (year, month, userId = null) => {
-    const totals = transactionModel.getMonthlyTotals(year, month, userId);
-    const totalIncome = Math.round((totals?.totalIncome || 0) * 100) / 100;
-    const totalExpense = Math.round((totals?.totalExpense || 0) * 100) / 100;
+  getMonthlySummary: async (year, month, userId = null) => {
+    const totals = await transactionModel.getMonthlyTotals(year, month, userId);
+    const totalIncome = Math.round((Number(totals?.totalIncome) || 0) * 100) / 100;
+    const totalExpense = Math.round((Number(totals?.totalExpense) || 0) * 100) / 100;
     const netBalance = Math.round((totalIncome - totalExpense) * 100) / 100;
     
     // Savings rate
@@ -24,29 +24,34 @@ const analyticsService = {
       : 0;
 
     // Category breakdown for expenses
-    const rawExpenseCategories = transactionModel.getCategoryBreakdown(year, month, 'EXPENSE', userId);
+    const rawExpenseCategories = await transactionModel.getCategoryBreakdown(year, month, 'EXPENSE', userId);
     const expenseBreakdown = rawExpenseCategories.map(cat => ({
       category: cat.category,
-      amount: Math.round(cat.totalAmount * 100) / 100,
-      count: cat.count,
+      amount: Math.round(Number(cat.totalAmount) * 100) / 100,
+      count: Number(cat.count),
       percentage: totalExpense > 0
-        ? Math.round((cat.totalAmount / totalExpense) * 1000) / 10
+        ? Math.round((Number(cat.totalAmount) / totalExpense) * 1000) / 10
         : 0
     }));
 
     // Category breakdown for income
-    const rawIncomeCategories = transactionModel.getCategoryBreakdown(year, month, 'INCOME', userId);
+    const rawIncomeCategories = await transactionModel.getCategoryBreakdown(year, month, 'INCOME', userId);
     const incomeBreakdown = rawIncomeCategories.map(cat => ({
       category: cat.category,
-      amount: Math.round(cat.totalAmount * 100) / 100,
-      count: cat.count,
+      amount: Math.round(Number(cat.totalAmount) * 100) / 100,
+      count: Number(cat.count),
       percentage: totalIncome > 0
-        ? Math.round((cat.totalAmount / totalIncome) * 1000) / 10
+        ? Math.round((Number(cat.totalAmount) / totalIncome) * 1000) / 10
         : 0
     }));
 
     // Daily trend
-    const dailyTrend = transactionModel.getDailyCashFlow(year, month, userId);
+    const rawTrend = await transactionModel.getDailyCashFlow(year, month, userId);
+    const dailyTrend = rawTrend.map(d => ({
+      date: d.date,
+      income: Number(d.income) || 0,
+      expense: Number(d.expense) || 0
+    }));
 
     return {
       month,
@@ -57,16 +62,16 @@ const analyticsService = {
       netBalance,
       savingsRate,
       dailyAverage,
-      transactionCount: totals?.transactionCount || 0,
+      transactionCount: Number(totals?.transactionCount) || 0,
       expenseBreakdown,
       incomeBreakdown,
       dailyTrend
     };
   },
 
-  compareMonths: (y1, m1, y2, m2, userId = null) => {
-    const month1Summary = analyticsService.getMonthlySummary(y1, m1, userId);
-    const month2Summary = analyticsService.getMonthlySummary(y2, m2, userId);
+  compareMonths: async (y1, m1, y2, m2, userId = null) => {
+    const month1Summary = await analyticsService.getMonthlySummary(y1, m1, userId);
+    const month2Summary = await analyticsService.getMonthlySummary(y2, m2, userId);
 
     const expenseDiff = Math.round((month2Summary.totalExpense - month1Summary.totalExpense) * 100) / 100;
     const expensePercentDiff = month1Summary.totalExpense > 0
@@ -134,13 +139,11 @@ const analyticsService = {
         insights.push(`Overall expenses remained stable across both months.`);
       }
 
-      // Top increase category
       const topIncrease = [...categoryComparison].filter(c => c.diff > 0).sort((a, b) => b.diff - a.diff)[0];
       if (topIncrease) {
         insights.push(`Highest spend increase was in "${topIncrease.category}" (+${topIncrease.percentDiff}%).`);
       }
 
-      // Top savings category
       const topSavings = [...categoryComparison].filter(c => c.diff < 0).sort((a, b) => a.diff - b.diff)[0];
       if (topSavings) {
         insights.push(`You saved the most in "${topSavings.category}" (-${Math.abs(topSavings.diff)}).`);

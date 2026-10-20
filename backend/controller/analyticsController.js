@@ -4,7 +4,7 @@ const analyticsController = {
   getMonthlySummary: async (req, res, next) => {
     try {
       const { year, month } = req.query;
-      const summary = analyticsService.getMonthlySummary(year, month, req.userId);
+      const summary = await analyticsService.getMonthlySummary(year, month, req.userId);
       res.status(200).json({
         success: true,
         data: summary
@@ -17,7 +17,7 @@ const analyticsController = {
   compareMonths: async (req, res, next) => {
     try {
       const { y1, m1, y2, m2 } = req.query;
-      const comparison = analyticsService.compareMonths(y1, m1, y2, m2, req.userId);
+      const comparison = await analyticsService.compareMonths(y1, m1, y2, m2, req.userId);
       res.status(200).json({
         success: true,
         data: comparison
