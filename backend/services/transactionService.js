@@ -2,9 +2,10 @@ const { v4: uuidv4 } = require('uuid');
 const transactionModel = require('../model/transactionModel');
 
 const transactionService = {
-  createTransaction: (data) => {
+  createTransaction: (data, userId = null) => {
     const transaction = {
       id: uuidv4(),
+      userId: data.userId || userId || null,
       title: data.title,
       amount: Number(data.amount),
       type: data.type.toUpperCase(),
@@ -17,7 +18,7 @@ const transactionService = {
     return transactionModel.create(transaction);
   },
 
-  getTransactionById: (id) => {
+  getTransactionById: (id, userId = null) => {
     const transaction = transactionModel.findById(id);
     if (!transaction) {
       const err = new Error(`Transaction with ID '${id}' not found`);
@@ -27,12 +28,13 @@ const transactionService = {
     return transaction;
   },
 
-  getTransactions: ({ month, year, type, category, search, page = 1, limit = 50, sortBy, sortOrder }) => {
+  getTransactions: ({ userId, month, year, type, category, search, page = 1, limit = 50, sortBy, sortOrder }) => {
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
     const offset = (pageNum - 1) * limitNum;
 
     const filterOptions = {
+      userId,
       month,
       year,
       type,
@@ -45,7 +47,7 @@ const transactionService = {
     };
 
     const items = transactionModel.findAll(filterOptions);
-    const totalCount = transactionModel.count({ month, year, type, category, search });
+    const totalCount = transactionModel.count({ userId, month, year, type, category, search });
     const totalPages = Math.ceil(totalCount / limitNum);
 
     return {
@@ -61,9 +63,9 @@ const transactionService = {
     };
   },
 
-  updateTransaction: (id, updates) => {
+  updateTransaction: (id, updates, userId = null) => {
     // Check if exists
-    transactionService.getTransactionById(id);
+    transactionService.getTransactionById(id, userId);
 
     const safeUpdates = {};
     if (updates.title !== undefined) safeUpdates.title = updates.title;
@@ -74,16 +76,16 @@ const transactionService = {
     if (updates.date !== undefined) safeUpdates.date = updates.date;
     if (updates.notes !== undefined) safeUpdates.notes = updates.notes;
 
-    return transactionModel.update(id, safeUpdates);
+    return transactionModel.update(id, safeUpdates, userId);
   },
 
-  deleteTransaction: (id) => {
+  deleteTransaction: (id, userId = null) => {
     // Check if exists
-    transactionService.getTransactionById(id);
-    return transactionModel.delete(id);
+    transactionService.getTransactionById(id, userId);
+    return transactionModel.delete(id, userId);
   },
 
-  syncBatch: (operations) => {
+  syncBatch: (operations, userId = null) => {
     if (!Array.isArray(operations) || operations.length === 0) {
       return { created: 0, updated: 0, deleted: 0, total: 0 };
     }
@@ -102,7 +104,7 @@ const transactionService = {
       return op;
     });
 
-    return transactionModel.syncBatch(sanitizedOps);
+    return transactionModel.syncBatch(sanitizedOps, userId);
   }
 };
 

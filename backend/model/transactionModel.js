@@ -3,10 +3,13 @@ const db = require('./db');
 const transactionModel = {
   create: (transaction) => {
     const stmt = db.prepare(`
-      INSERT INTO transactions (id, title, amount, type, category, paymentMode, date, notes, createdAt, updatedAt)
-      VALUES (@id, @title, @amount, @type, @category, @paymentMode, @date, @notes, datetime('now'), datetime('now'))
+      INSERT INTO transactions (id, userId, title, amount, type, category, paymentMode, date, notes, createdAt, updatedAt)
+      VALUES (@id, @userId, @title, @amount, @type, @category, @paymentMode, @date, @notes, datetime('now'), datetime('now'))
     `);
-    stmt.run(transaction);
+    stmt.run({
+      ...transaction,
+      userId: transaction.userId || null
+    });
     return transactionModel.findById(transaction.id);
   },
 
@@ -15,9 +18,14 @@ const transactionModel = {
     return stmt.get(id);
   },
 
-  findAll: ({ month, year, type, category, search, limit = 50, offset = 0, sortBy = 'date', sortOrder = 'DESC' }) => {
+  findAll: ({ userId, month, year, type, category, search, limit = 50, offset = 0, sortBy = 'date', sortOrder = 'DESC' }) => {
     let whereClauses = [];
     let params = {};
+
+    if (userId) {
+      whereClauses.push("userId = @userId");
+      params.userId = userId;
+    }
 
     if (year && month) {
       const monthStr = `${year}-${String(month).padStart(2, '0')}`;
@@ -61,9 +69,14 @@ const transactionModel = {
     return stmt.all(params);
   },
 
-  count: ({ month, year, type, category, search }) => {
+  count: ({ userId, month, year, type, category, search }) => {
     let whereClauses = [];
     let params = {};
+
+    if (userId) {
+      whereClauses.push("userId = @userId");
+      params.userId = userId;
+    }
 
     if (year && month) {
       const monthStr = `${year}-${String(month).padStart(2, '0')}`;
@@ -95,7 +108,7 @@ const transactionModel = {
     return stmt.get(params).total;
   },
 
-  update: (id, updates) => {
+  update: (id, updates, userId = null) => {
     const fields = [];
     const params = { id };
 
@@ -110,66 +123,95 @@ const transactionModel = {
 
     fields.push("updatedAt = datetime('now')");
 
-    const sql = `UPDATE transactions SET ${fields.join(', ')} WHERE id = @id`;
+    let whereSql = 'WHERE id = @id';
+    if (userId) {
+      whereSql += ' AND (userId = @userId OR userId IS NULL)';
+      params.userId = userId;
+    }
+
+    const sql = `UPDATE transactions SET ${fields.join(', ')} ${whereSql}`;
     const stmt = db.prepare(sql);
     stmt.run(params);
     return transactionModel.findById(id);
   },
 
-  delete: (id) => {
-    const stmt = db.prepare(`DELETE FROM transactions WHERE id = ?`);
-    const result = stmt.run(id);
+  delete: (id, userId = null) => {
+    let sql = 'DELETE FROM transactions WHERE id = ?';
+    const params = [id];
+    if (userId) {
+      sql += ' AND (userId = ? OR userId IS NULL)';
+      params.push(userId);
+    }
+    const stmt = db.prepare(sql);
+    const result = stmt.run(...params);
     return result.changes > 0;
   },
 
-  getMonthlyTotals: (year, month) => {
+  getMonthlyTotals: (year, month, userId = null) => {
     const monthStr = `${year}-${String(month).padStart(2, '0')}`;
-    const stmt = db.prepare(`
+    let sql = `
       SELECT 
         COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END), 0) as totalIncome,
         COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END), 0) as totalExpense,
         COUNT(*) as transactionCount
       FROM transactions
       WHERE strftime('%Y-%m', date) = ?
-    `);
-    return stmt.get(monthStr);
+    `;
+    const params = [monthStr];
+    if (userId) {
+      sql += ' AND userId = ?';
+      params.push(userId);
+    }
+    const stmt = db.prepare(sql);
+    return stmt.get(...params);
   },
 
-  getCategoryBreakdown: (year, month, type = 'EXPENSE') => {
+  getCategoryBreakdown: (year, month, type = 'EXPENSE', userId = null) => {
     const monthStr = `${year}-${String(month).padStart(2, '0')}`;
-    const stmt = db.prepare(`
+    let sql = `
       SELECT 
         category,
         COALESCE(SUM(amount), 0) as totalAmount,
         COUNT(*) as count
       FROM transactions
       WHERE strftime('%Y-%m', date) = ? AND type = ?
-      GROUP BY category
-      ORDER BY totalAmount DESC
-    `);
-    return stmt.all(monthStr, type);
+    `;
+    const params = [monthStr, type];
+    if (userId) {
+      sql += ' AND userId = ?';
+      params.push(userId);
+    }
+    sql += ' GROUP BY category ORDER BY totalAmount DESC';
+    const stmt = db.prepare(sql);
+    return stmt.all(...params);
   },
 
-  getDailyCashFlow: (year, month) => {
+  getDailyCashFlow: (year, month, userId = null) => {
     const monthStr = `${year}-${String(month).padStart(2, '0')}`;
-    const stmt = db.prepare(`
+    let sql = `
       SELECT 
         date,
         COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END), 0) as income,
         COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END), 0) as expense
       FROM transactions
       WHERE strftime('%Y-%m', date) = ?
-      GROUP BY date
-      ORDER BY date ASC
-    `);
-    return stmt.all(monthStr);
+    `;
+    const params = [monthStr];
+    if (userId) {
+      sql += ' AND userId = ?';
+      params.push(userId);
+    }
+    sql += ' GROUP BY date ORDER BY date ASC';
+    const stmt = db.prepare(sql);
+    return stmt.all(...params);
   },
 
-  syncBatch: (operations) => {
+  syncBatch: (operations, userId = null) => {
     const insertStmt = db.prepare(`
-      INSERT INTO transactions (id, title, amount, type, category, paymentMode, date, notes, createdAt, updatedAt)
-      VALUES (@id, @title, @amount, @type, @category, @paymentMode, @date, @notes, datetime('now'), datetime('now'))
+      INSERT INTO transactions (id, userId, title, amount, type, category, paymentMode, date, notes, createdAt, updatedAt)
+      VALUES (@id, @userId, @title, @amount, @type, @category, @paymentMode, @date, @notes, datetime('now'), datetime('now'))
       ON CONFLICT(id) DO UPDATE SET
+        userId = COALESCE(excluded.userId, transactions.userId),
         title = excluded.title,
         amount = excluded.amount,
         type = excluded.type,
@@ -191,6 +233,7 @@ const transactionModel = {
         if (op.action === 'CREATE' || op.action === 'UPDATE') {
           insertStmt.run({
             id: op.data.id,
+            userId: op.data.userId || userId || null,
             title: op.data.title,
             amount: Number(op.data.amount),
             type: op.data.type.toUpperCase(),

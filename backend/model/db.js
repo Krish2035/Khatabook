@@ -24,6 +24,7 @@ const initSchema = () => {
   db.exec(`
     CREATE TABLE IF NOT EXISTS transactions (
       id TEXT PRIMARY KEY,
+      userId TEXT,
       title TEXT NOT NULL,
       amount REAL NOT NULL CHECK(amount > 0),
       type TEXT NOT NULL CHECK(type IN ('INCOME', 'EXPENSE')),
@@ -55,6 +56,14 @@ const initSchema = () => {
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
   `);
+
+  // Migration: Ensure userId column exists on transactions table
+  const columns = db.pragma('table_info(transactions)');
+  const hasUserId = columns.some(c => c.name === 'userId');
+  if (!hasUserId) {
+    db.exec(`ALTER TABLE transactions ADD COLUMN userId TEXT;`);
+  }
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_transactions_userId ON transactions (userId);`);
 };
 
 initSchema();

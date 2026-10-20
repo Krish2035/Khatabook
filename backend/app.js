@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const apiLimiter = require('./middleware/rateLimiter');
 const requestLogger = require('./middleware/requestLogger');
+const authMiddleware = require('./middleware/authMiddleware');
 const errorHandler = require('./middleware/errorHandler');
 const routes = require('./routes');
 
@@ -31,6 +32,9 @@ app.use(requestLogger);
 
 // Traffic Ingress: Rate limiting on API routes
 app.use('/api', apiLimiter);
+
+// User Authentication & Scoped Identity
+app.use(authMiddleware);
 
 // API Routes
 app.use('/api', routes);

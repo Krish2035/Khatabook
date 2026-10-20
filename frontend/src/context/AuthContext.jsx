@@ -17,7 +17,16 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('khatabook_token') || null);
   const [loading, setLoading] = useState(false);
 
+  const clearLocalUserData = () => {
+    try {
+      localStorage.removeItem('khatabook_cached_transactions');
+      localStorage.removeItem('khatabook_cached_summary');
+      localStorage.removeItem('khatabook_offline_outbox');
+    } catch {}
+  };
+
   const saveAuthSession = (userData, tokenString) => {
+    clearLocalUserData();
     setUser(userData);
     setToken(tokenString);
     localStorage.setItem('khatabook_user', JSON.stringify(userData));
@@ -25,6 +34,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    clearLocalUserData();
     setUser(null);
     setToken(null);
     localStorage.removeItem('khatabook_user');

@@ -17,14 +17,26 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+const DEFAULT_SUMMARY = {
+  totalIncome: 0,
+  totalExpense: 0,
+  netBalance: 0,
+  savingsRate: 0,
+  dailyAverage: 0,
+  transactionCount: 0,
+  expenseBreakdown: [],
+  incomeBreakdown: [],
+  dailyTrend: []
+};
+
 export const TransactionProvider = ({ children }) => {
   const today = new Date();
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1);
 
-  const [transactions, setTransactions] = useState(() => getCachedTransactions());
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, totalItems: transactions.length });
-  const [summary, setSummary] = useState(() => getCachedSummary());
+  const [transactions, setTransactions] = useState(() => getCachedTransactions() || []);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, totalItems: 0 });
+  const [summary, setSummary] = useState(() => getCachedSummary() || DEFAULT_SUMMARY);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
 

@@ -3,7 +3,7 @@ const transactionService = require('../services/transactionService');
 const transactionController = {
   create: async (req, res, next) => {
     try {
-      const transaction = transactionService.createTransaction(req.body);
+      const transaction = transactionService.createTransaction(req.body, req.userId);
       res.status(201).json({
         success: true,
         message: 'Transaction recorded successfully',
@@ -18,6 +18,7 @@ const transactionController = {
     try {
       const { month, year, type, category, search, page, limit, sortBy, sortOrder } = req.query;
       const result = transactionService.getTransactions({
+        userId: req.userId,
         month,
         year,
         type,
@@ -40,7 +41,7 @@ const transactionController = {
 
   getById: async (req, res, next) => {
     try {
-      const transaction = transactionService.getTransactionById(req.params.id);
+      const transaction = transactionService.getTransactionById(req.params.id, req.userId);
       res.status(200).json({
         success: true,
         data: transaction
@@ -52,7 +53,7 @@ const transactionController = {
 
   update: async (req, res, next) => {
     try {
-      const updated = transactionService.updateTransaction(req.params.id, req.body);
+      const updated = transactionService.updateTransaction(req.params.id, req.body, req.userId);
       res.status(200).json({
         success: true,
         message: 'Transaction updated successfully',
@@ -65,7 +66,7 @@ const transactionController = {
 
   delete: async (req, res, next) => {
     try {
-      transactionService.deleteTransaction(req.params.id);
+      transactionService.deleteTransaction(req.params.id, req.userId);
       res.status(200).json({
         success: true,
         message: 'Transaction deleted successfully'
@@ -78,7 +79,7 @@ const transactionController = {
   syncBatch: async (req, res, next) => {
     try {
       const { operations } = req.body;
-      const result = transactionService.syncBatch(operations);
+      const result = transactionService.syncBatch(operations, req.userId);
       res.status(200).json({
         success: true,
         message: `Successfully synchronized ${result.total} transactions`,
