@@ -55,9 +55,10 @@ const DashboardContent = () => {
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Key Metric Stat Cards */}
           <div
+            className="stat-cards-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
               gap: '1.25rem',
             }}
           >

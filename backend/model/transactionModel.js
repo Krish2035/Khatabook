@@ -163,6 +163,54 @@ const transactionModel = {
       ORDER BY date ASC
     `);
     return stmt.all(monthStr);
+  },
+
+  syncBatch: (operations) => {
+    const insertStmt = db.prepare(`
+      INSERT INTO transactions (id, title, amount, type, category, paymentMode, date, notes, createdAt, updatedAt)
+      VALUES (@id, @title, @amount, @type, @category, @paymentMode, @date, @notes, datetime('now'), datetime('now'))
+      ON CONFLICT(id) DO UPDATE SET
+        title = excluded.title,
+        amount = excluded.amount,
+        type = excluded.type,
+        category = excluded.category,
+        paymentMode = excluded.paymentMode,
+        date = excluded.date,
+        notes = excluded.notes,
+        updatedAt = datetime('now')
+    `);
+
+    const deleteStmt = db.prepare(`DELETE FROM transactions WHERE id = ?`);
+
+    const runBatch = db.transaction((ops) => {
+      let created = 0;
+      let updated = 0;
+      let deleted = 0;
+
+      for (const op of ops) {
+        if (op.action === 'CREATE' || op.action === 'UPDATE') {
+          insertStmt.run({
+            id: op.data.id,
+            title: op.data.title,
+            amount: Number(op.data.amount),
+            type: op.data.type.toUpperCase(),
+            category: op.data.category,
+            paymentMode: op.data.paymentMode || 'Cash',
+            date: op.data.date,
+            notes: op.data.notes || ''
+          });
+          if (op.action === 'CREATE') created++;
+          else updated++;
+        } else if (op.action === 'DELETE') {
+          deleteStmt.run(op.id);
+          deleted++;
+        }
+      }
+
+      return { created, updated, deleted, total: ops.length };
+    });
+
+    return runBatch(operations);
   }
 };
 

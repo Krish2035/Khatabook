@@ -10,7 +10,7 @@ const TransactionItem = ({ transaction, onEdit, onDelete }) => {
 
   return (
     <div
-      className="glass-card"
+      className="glass-card transaction-item-row"
       style={{
         display: 'flex',
         alignItems: 'center',

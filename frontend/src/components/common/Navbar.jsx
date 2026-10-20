@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTransactions } from '../../context/TransactionContext';
 import CurrencySelector from './CurrencySelector';
+import OfflineBadge from './OfflineBadge';
 import {
   BookOpen,
   ChevronLeft,
@@ -18,69 +19,161 @@ const MONTH_NAMES = [
 ];
 
 const Navbar = ({ activeTab, setActiveTab, onOpenAddModal }) => {
-  const { selectedMonth, selectedYear, changeMonth, setSpecificMonth } = useTransactions();
+  const { selectedMonth, selectedYear, changeMonth } = useTransactions();
 
   return (
     <header
-      className="glass-card"
+      className="glass-card navbar-container"
       style={{
         position: 'sticky',
-        top: '1rem',
+        top: '0.75rem',
         zIndex: 100,
-        marginBottom: '2rem',
-        padding: '0.85rem 1.5rem',
+        marginBottom: '1.5rem',
+        padding: '0.85rem 1.25rem',
         borderRadius: 'var(--radius-md)',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem',
       }}
     >
-      {/* Brand Logo & Name */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+      {/* Top Row: Brand, Offline Status, Currency & Add Entry */}
+      <div
+        className="navbar-top-row"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+        }}
+      >
+        {/* Brand */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: 'var(--radius-sm)',
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px var(--color-accent-glow)',
+              flexShrink: 0,
+            }}
+          >
+            <BookOpen size={20} color="#ffffff" />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <h1 style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+                Khatabook
+              </h1>
+              <span
+                style={{
+                  fontSize: '0.62rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  background: 'rgba(99, 102, 241, 0.15)',
+                  color: '#818cf8',
+                  padding: '0.1rem 0.4rem',
+                  borderRadius: 'var(--radius-full)',
+                  border: '1px solid rgba(99, 102, 241, 0.3)',
+                }}
+              >
+                PWA
+              </span>
+            </div>
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0 }}>
+              Smart Ledger & Offline Sync
+            </p>
+          </div>
+        </div>
+
+        {/* Right side controls: Offline Badge, Month Selector, Currency & Add CTA */}
         <div
+          className="navbar-actions"
           style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: 'var(--radius-sm)',
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px var(--color-accent-glow)',
+            gap: '0.6rem',
+            flexWrap: 'wrap',
           }}
         >
-          <BookOpen size={22} color="#ffffff" />
-        </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-              Khatabook
-            </h1>
-            <span
+          {/* Offline / Sync Badge */}
+          <OfflineBadge />
+
+          {/* Month Selector */}
+          <div
+            className="navbar-month-picker"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.1rem 0.2rem',
+            }}
+          >
+            <button
+              onClick={() => changeMonth(-1)}
+              className="btn btn-ghost btn-icon"
+              style={{ width: '26px', height: '26px' }}
+              title="Previous Month"
+              aria-label="Previous Month"
+            >
+              <ChevronLeft size={15} />
+            </button>
+
+            <div
               style={{
-                fontSize: '0.65rem',
+                padding: '0 0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
                 fontWeight: 700,
-                textTransform: 'uppercase',
-                background: 'rgba(99, 102, 241, 0.15)',
-                color: '#818cf8',
-                padding: '0.15rem 0.45rem',
-                borderRadius: 'var(--radius-full)',
-                border: '1px solid rgba(99, 102, 241, 0.3)',
+                fontSize: '0.825rem',
+                color: 'var(--text-primary)',
+                minWidth: '115px',
+                justifyContent: 'center',
+                whiteSpace: 'nowrap',
               }}
             >
-              Pro Ledger
-            </span>
+              <Calendar size={13} color="var(--color-accent)" />
+              <span>{MONTH_NAMES[selectedMonth - 1]} {selectedYear}</span>
+            </div>
+
+            <button
+              onClick={() => changeMonth(1)}
+              className="btn btn-ghost btn-icon"
+              style={{ width: '26px', height: '26px' }}
+              title="Next Month"
+              aria-label="Next Month"
+            >
+              <ChevronRight size={15} />
+            </button>
           </div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Expense & Income Intelligence
-          </p>
+
+          {/* Currency Switcher */}
+          <CurrencySelector />
+
+          {/* Add Entry CTA */}
+          <button
+            onClick={onOpenAddModal}
+            className="btn btn-primary"
+            style={{
+              padding: '0.45rem 0.9rem',
+              fontSize: '0.825rem',
+              fontWeight: 700,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <PlusCircle size={16} />
+            <span>Add Entry</span>
+          </button>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Bottom Row / Navigation Tabs */}
       <nav
+        className="navbar-tabs"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -89,123 +182,65 @@ const Navbar = ({ activeTab, setActiveTab, onOpenAddModal }) => {
           borderRadius: 'var(--radius-sm)',
           border: '1px solid var(--border-subtle)',
           gap: '0.25rem',
+          marginTop: '0.75rem',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         <button
           onClick={() => setActiveTab('overview')}
-          className="btn"
+          className="btn tab-btn"
           style={{
-            padding: '0.45rem 0.9rem',
-            fontSize: '0.85rem',
+            flex: 1,
+            padding: '0.45rem 0.75rem',
+            fontSize: '0.825rem',
             borderRadius: 'var(--radius-sm)',
             backgroundColor: activeTab === 'overview' ? 'var(--color-accent)' : 'transparent',
             color: activeTab === 'overview' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: activeTab === 'overview' ? 700 : 500,
+            whiteSpace: 'nowrap',
           }}
         >
-          <LayoutDashboard size={16} />
+          <LayoutDashboard size={15} />
           <span>Dashboard</span>
         </button>
 
         <button
           onClick={() => setActiveTab('compare')}
-          className="btn"
+          className="btn tab-btn"
           style={{
-            padding: '0.45rem 0.9rem',
-            fontSize: '0.85rem',
+            flex: 1,
+            padding: '0.45rem 0.75rem',
+            fontSize: '0.825rem',
             borderRadius: 'var(--radius-sm)',
             backgroundColor: activeTab === 'compare' ? 'var(--color-accent)' : 'transparent',
             color: activeTab === 'compare' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: activeTab === 'compare' ? 700 : 500,
+            whiteSpace: 'nowrap',
           }}
         >
-          <GitCompare size={16} />
+          <GitCompare size={15} />
           <span>Compare Months</span>
         </button>
 
         <button
           onClick={() => setActiveTab('transactions')}
-          className="btn"
+          className="btn tab-btn"
           style={{
-            padding: '0.45rem 0.9rem',
-            fontSize: '0.85rem',
+            flex: 1,
+            padding: '0.45rem 0.75rem',
+            fontSize: '0.825rem',
             borderRadius: 'var(--radius-sm)',
             backgroundColor: activeTab === 'transactions' ? 'var(--color-accent)' : 'transparent',
             color: activeTab === 'transactions' ? '#ffffff' : 'var(--text-secondary)',
             fontWeight: activeTab === 'transactions' ? 700 : 500,
+            whiteSpace: 'nowrap',
           }}
         >
-          <History size={16} />
+          <History size={15} />
           <span>Transactions</span>
         </button>
       </nav>
-
-      {/* Right Controls: Month Selector, Currency Selector, Add Transaction CTA */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-        {/* Month Selector */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: 'var(--bg-surface)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '0.15rem 0.25rem',
-          }}
-        >
-          <button
-            onClick={() => changeMonth(-1)}
-            className="btn btn-ghost btn-icon"
-            style={{ width: '28px', height: '28px' }}
-            title="Previous Month"
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          <div
-            style={{
-              padding: '0 0.6rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              color: 'var(--text-primary)',
-              minWidth: '130px',
-              justifyContent: 'center',
-            }}
-          >
-            <Calendar size={14} color="var(--color-accent)" />
-            <span>{MONTH_NAMES[selectedMonth - 1]} {selectedYear}</span>
-          </div>
-
-          <button
-            onClick={() => changeMonth(1)}
-            className="btn btn-ghost btn-icon"
-            style={{ width: '28px', height: '28px' }}
-            title="Next Month"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
-
-        {/* Currency Switcher */}
-        <CurrencySelector />
-
-        {/* Add Entry CTA */}
-        <button
-          onClick={onOpenAddModal}
-          className="btn btn-primary"
-          style={{
-            padding: '0.55rem 1rem',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-          }}
-        >
-          <PlusCircle size={17} />
-          <span>Add Entry</span>
-        </button>
-      </div>
     </header>
   );
 };

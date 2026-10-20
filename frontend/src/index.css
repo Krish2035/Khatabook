@@ -1,11 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* ==========================================================================
+   Khatabook FinTech Design System
+   Font Family: Calibri (with high-grade fallback stack)
+   Full Tablet & Mobile Responsiveness + PWA Offline Styling
+   ========================================================================== */
 
 :root {
   --bg-primary: #070b14;
   --bg-surface: #0e1526;
   --bg-surface-elevated: #162035;
-  --bg-card: rgba(19, 28, 48, 0.65);
-  --bg-card-hover: rgba(27, 39, 66, 0.85);
+  --bg-card: rgba(19, 28, 48, 0.75);
+  --bg-card-hover: rgba(27, 39, 66, 0.9);
 
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.16);
@@ -30,8 +34,9 @@
   --color-warning: #f59e0b;
   --color-warning-subtle: rgba(245, 158, 11, 0.12);
 
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Primary Font Family: Calibri */
+  --font-sans: 'Calibri', 'Segoe UI', Candara, Arial, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Calibri', 'Segoe UI', 'Courier New', monospace;
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.5);
@@ -46,10 +51,16 @@
   --backdrop-blur: blur(14px);
 }
 
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: var(--font-sans);
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -59,18 +70,18 @@ body {
   min-height: 100vh;
   line-height: 1.5;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(244, 63, 94, 0.08) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.14) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.09) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(244, 63, 94, 0.09) 0px, transparent 50%);
   background-attachment: fixed;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar Styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-primary);
@@ -83,7 +94,7 @@ body {
   background: var(--text-muted);
 }
 
-/* Glassmorphism Card Utility */
+/* Glass Card */
 .glass-card {
   background: var(--bg-card);
   backdrop-filter: var(--backdrop-blur);
@@ -91,7 +102,7 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
@@ -99,11 +110,11 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
-/* Layout Utilities */
+/* Container */
 .app-container {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 4rem;
+  padding: 1.25rem 1.25rem 4rem;
 }
 
 /* Buttons */
@@ -111,16 +122,18 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
+  gap: 0.45rem;
+  padding: 0.55rem 1.15rem;
+  font-size: 0.9rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
   font-family: var(--font-sans);
   text-decoration: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-primary {
@@ -152,16 +165,6 @@ body {
   color: var(--text-primary);
 }
 
-.btn-danger {
-  background: var(--color-expense-subtle);
-  color: var(--color-expense);
-  border-color: rgba(244, 63, 94, 0.2);
-}
-.btn-danger:hover {
-  background: var(--color-expense);
-  color: #fff;
-}
-
 .btn-icon {
   width: 2.25rem;
   height: 2.25rem;
@@ -169,55 +172,16 @@ body {
   border-radius: var(--radius-sm);
 }
 
-/* Badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.badge-income {
-  background: var(--color-income-subtle);
-  color: var(--color-income);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-}
-
-.badge-expense {
-  background: var(--color-expense-subtle);
-  color: var(--color-expense);
-  border: 1px solid rgba(244, 63, 94, 0.25);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
 /* Form Inputs */
 .input, .select, .textarea {
   width: 100%;
-  padding: 0.65rem 0.9rem;
+  padding: 0.65rem 0.85rem;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   outline: none;
   transition: all 0.2s ease;
 }
@@ -229,4 +193,155 @@ body {
 
 .input::placeholder, .textarea::placeholder {
   color: var(--text-muted);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints: Tablets & Mobile
+   ========================================================================== */
+
+/* Tablet Screens (1024px and below) */
+@media (max-width: 1024px) {
+  .app-container {
+    padding: 1rem 1rem 3.5rem;
+  }
+
+  .stat-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Mobile & Small Tablets (768px and below) */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 0.75rem 0.75rem 4.5rem;
+  }
+
+  .navbar-top-row {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .navbar-actions {
+    justify-content: space-between !important;
+    width: 100%;
+  }
+
+  .navbar-month-picker {
+    flex: 1;
+    justify-content: space-between;
+  }
+
+  .navbar-tabs {
+    width: 100%;
+  }
+
+  .tab-btn span {
+    font-size: 0.78rem;
+  }
+
+  .stat-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .comparison-selectors {
+    flex-direction: column;
+    align-items: stretch !important;
+    width: 100%;
+  }
+
+  .comparison-selectors > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* Mobile Portrait (480px and below) */
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+
+  .app-container {
+    padding: 0.5rem 0.5rem 4rem;
+  }
+
+  .navbar-container {
+    padding: 0.75rem 0.85rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .stat-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
+  }
+
+  .navbar-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem !important;
+  }
+
+  .navbar-actions > .navbar-month-picker {
+    grid-column: span 2;
+  }
+
+  .navbar-actions > button.btn-primary {
+    width: 100%;
+  }
+
+  .tab-btn {
+    padding: 0.4rem 0.4rem !important;
+    font-size: 0.75rem !important;
+  }
+  .tab-btn svg {
+    display: none; /* Hide icon on very small screens for clean text */
+  }
+
+  /* Transaction Items on Mobile */
+  .transaction-item-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.6rem !important;
+  }
+
+  .transaction-item-row > div:last-child {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between !important;
+    border-top: 1px dashed var(--border-subtle);
+    padding-top: 0.5rem;
+  }
 }

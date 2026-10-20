@@ -81,6 +81,28 @@ const transactionService = {
     // Check if exists
     transactionService.getTransactionById(id);
     return transactionModel.delete(id);
+  },
+
+  syncBatch: (operations) => {
+    if (!Array.isArray(operations) || operations.length === 0) {
+      return { created: 0, updated: 0, deleted: 0, total: 0 };
+    }
+
+    // Validate and sanitize each operation
+    const sanitizedOps = operations.map((op) => {
+      if (!op.action || !['CREATE', 'UPDATE', 'DELETE'].includes(op.action)) {
+        throw new Error(`Invalid sync action '${op.action}'`);
+      }
+      if (op.action === 'DELETE' && !op.id) {
+        throw new Error('Delete operation requires transaction ID');
+      }
+      if ((op.action === 'CREATE' || op.action === 'UPDATE') && (!op.data || !op.data.id)) {
+        throw new Error(`${op.action} operation requires data with transaction ID`);
+      }
+      return op;
+    });
+
+    return transactionModel.syncBatch(sanitizedOps);
   }
 };
 

@@ -27,6 +27,7 @@ export const transactionApi = {
   create: (data) => api.post('/transactions', data),
   update: (id, data) => api.put(`/transactions/${id}`, data),
   delete: (id) => api.delete(`/transactions/${id}`),
+  sync: (operations) => api.post('/transactions/sync', { operations }),
 };
 
 export const analyticsApi = {

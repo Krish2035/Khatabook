@@ -73,6 +73,20 @@ const transactionController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  syncBatch: async (req, res, next) => {
+    try {
+      const { operations } = req.body;
+      const result = transactionService.syncBatch(operations);
+      res.status(200).json({
+        success: true,
+        message: `Successfully synchronized ${result.total} transactions`,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 };
 
