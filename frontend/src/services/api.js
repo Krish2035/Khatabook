@@ -8,6 +8,18 @@ const api = axios.create({
   },
 });
 
+// Request interceptor: Attach JWT token if available
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('khatabook_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Response interceptor for unified error formatting
 api.interceptors.response.use(
   (response) => response.data,
@@ -20,6 +32,13 @@ api.interceptors.response.use(
     return Promise.reject(new Error(message));
   }
 );
+
+export const authApi = {
+  signup: (data) => api.post('/auth/signup', data),
+  login: (data) => api.post('/auth/login', data),
+  googleAuth: (data) => api.post('/auth/google', data),
+  getMe: () => api.get('/auth/me'),
+};
 
 export const transactionApi = {
   getAll: (params) => api.get('/transactions', { params }),

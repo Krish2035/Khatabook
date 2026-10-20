@@ -270,19 +270,62 @@ const TransactionFormModal = ({ isOpen, onClose, initialData = null }) => {
           </div>
         </div>
 
-        {/* Date */}
+        {/* Date Section with Quick Shortcuts */}
         <div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-            <Calendar size={14} />
-            <span>Transaction Date</span>
-          </label>
-          <input
-            type="date"
-            required
-            value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            className="input"
-          />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+              <Calendar size={14} color="var(--color-accent)" />
+              <span>Transaction Date</span>
+            </label>
+            <div style={{ display: 'flex', gap: '0.35rem' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const now = new Date();
+                  const y = now.getFullYear();
+                  const m = String(now.getMonth() + 1).padStart(2, '0');
+                  const d = String(now.getDate()).padStart(2, '0');
+                  setFormData((prev) => ({ ...prev, date: `${y}-${m}-${d}` }));
+                }}
+                className="btn btn-ghost"
+                style={{ padding: '0.15rem 0.5rem', fontSize: '0.72rem', borderRadius: 'var(--radius-full)', background: 'var(--bg-surface)' }}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const yest = new Date();
+                  yest.setDate(yest.getDate() - 1);
+                  const y = yest.getFullYear();
+                  const m = String(yest.getMonth() + 1).padStart(2, '0');
+                  const d = String(yest.getDate()).padStart(2, '0');
+                  setFormData((prev) => ({ ...prev, date: `${y}-${m}-${d}` }));
+                }}
+                className="btn btn-ghost"
+                style={{ padding: '0.15rem 0.5rem', fontSize: '0.72rem', borderRadius: 'var(--radius-full)', background: 'var(--bg-surface)' }}
+              >
+                Yesterday
+              </button>
+            </div>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="date"
+              required
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              className="input"
+              style={{
+                colorScheme: 'dark',
+                fontWeight: 600,
+                fontSize: '0.925rem',
+                backgroundColor: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                padding: '0.65rem 0.85rem',
+              }}
+            />
+          </div>
         </div>
 
         {/* Notes (Optional) */}

@@ -195,6 +195,28 @@ body {
   color: var(--text-muted);
 }
 
+/* Date Input & Dark Calendar Picker Popup Styling */
+input[type="date"] {
+  color-scheme: dark;
+  position: relative;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.85) sepia(0.2) saturate(2) hue-rotate(190deg);
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.15);
+  background: var(--bg-surface-elevated);
+}
+
 /* Badges */
 .badge {
   display: inline-flex;

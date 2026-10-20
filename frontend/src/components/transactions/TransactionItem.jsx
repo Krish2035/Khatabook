@@ -129,11 +129,7 @@ const TransactionItem = ({ transaction, onEdit, onDelete }) => {
             <Edit2 size={15} />
           </button>
           <button
-            onClick={() => {
-              if (window.confirm(`Are you sure you want to delete "${transaction.title}"?`)) {
-                onDelete(transaction.id);
-              }
-            }}
+            onClick={() => onDelete(transaction)}
             className="btn btn-ghost btn-icon"
             style={{ width: '32px', height: '32px', color: 'var(--color-expense)' }}
             title="Delete"

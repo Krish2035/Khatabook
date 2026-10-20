@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTransactions } from '../../context/TransactionContext';
 import TransactionItem from './TransactionItem';
 import TransactionFilters from './TransactionFilters';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 import { ChevronLeft, ChevronRight, Inbox, PlusCircle } from 'lucide-react';
 
 const TransactionList = ({ onEdit, onAdd }) => {
   const { transactions, loading, pagination, filters, setFilters, deleteTransaction } = useTransactions();
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const handlePageChange = (newPage) => {
     setFilters((prev) => ({ ...prev, page: newPage }));
@@ -69,7 +71,7 @@ const TransactionList = ({ onEdit, onAdd }) => {
               key={tx.id}
               transaction={tx}
               onEdit={onEdit}
-              onDelete={deleteTransaction}
+              onDelete={(item) => setDeleteTarget(item)}
             />
           ))}
 
@@ -109,6 +111,14 @@ const TransactionList = ({ onEdit, onAdd }) => {
               </div>
             </div>
           )}
+
+          {/* In-App Delete Confirmation Modal */}
+          <ConfirmDeleteModal
+            isOpen={Boolean(deleteTarget)}
+            onClose={() => setDeleteTarget(null)}
+            onConfirm={(id) => deleteTransaction(id)}
+            transaction={deleteTarget}
+          />
         </div>
       )}
     </div>

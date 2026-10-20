@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AuthProvider } from './context/AuthContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { TransactionProvider, useTransactions } from './context/TransactionContext';
 import Navbar from './components/common/Navbar';
@@ -10,6 +11,7 @@ import MonthlySummary from './components/analytics/MonthlySummary';
 import MonthCompareView from './components/comparison/MonthCompareView';
 import TransactionList from './components/transactions/TransactionList';
 import TransactionFormModal from './components/transactions/TransactionFormModal';
+import AuthModal from './components/auth/AuthModal';
 import {
   TrendingUp,
   TrendingDown,
@@ -22,6 +24,7 @@ import {
 const DashboardContent = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
 
   const { summary, loading } = useTransactions();
@@ -48,6 +51,7 @@ const DashboardContent = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenAddModal={handleOpenAdd}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
       {/* Overview & Analytics Tab */}
@@ -189,6 +193,12 @@ const DashboardContent = () => {
         initialData={editItem}
       />
 
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
+
       {/* Notifications */}
       <Toast />
     </div>
@@ -197,11 +207,13 @@ const DashboardContent = () => {
 
 function App() {
   return (
-    <CurrencyProvider>
-      <TransactionProvider>
-        <DashboardContent />
-      </TransactionProvider>
-    </CurrencyProvider>
+    <AuthProvider>
+      <CurrencyProvider>
+        <TransactionProvider>
+          <DashboardContent />
+        </TransactionProvider>
+      </CurrencyProvider>
+    </AuthProvider>
   );
 }
 

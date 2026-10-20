@@ -40,6 +40,20 @@ const initSchema = () => {
     CREATE INDEX IF NOT EXISTS idx_transactions_type_date ON transactions (type, date);
     CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions (category);
     CREATE INDEX IF NOT EXISTS idx_transactions_month ON transactions (strftime('%Y-%m', date));
+
+    -- Users Table for Local & Firebase Authentication
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      passwordHash TEXT,
+      avatar TEXT,
+      authProvider TEXT NOT NULL DEFAULT 'local',
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
   `);
 };
 

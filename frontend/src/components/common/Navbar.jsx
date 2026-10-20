@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTransactions } from '../../context/TransactionContext';
+import { useAuth } from '../../context/AuthContext';
 import CurrencySelector from './CurrencySelector';
 import OfflineBadge from './OfflineBadge';
 import {
@@ -11,6 +12,10 @@ import {
   GitCompare,
   History,
   Calendar,
+  LogIn,
+  LogOut,
+  User,
+  ChevronDown,
 } from 'lucide-react';
 
 const MONTH_NAMES = [
@@ -18,8 +23,21 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-const Navbar = ({ activeTab, setActiveTab, onOpenAddModal }) => {
+const Navbar = ({ activeTab, setActiveTab, onOpenAddModal, onOpenAuthModal }) => {
   const { selectedMonth, selectedYear, changeMonth } = useTransactions();
+  const { user, logout } = useAuth();
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header
@@ -32,7 +50,7 @@ const Navbar = ({ activeTab, setActiveTab, onOpenAddModal }) => {
         borderRadius: 'var(--radius-md)',
       }}
     >
-      {/* Top Row: Brand, Offline Status, Currency & Add Entry */}
+      {/* Top Row: Brand, Offline Status, User Auth, Currency & Add Entry */}
       <div
         className="navbar-top-row"
         style={{
@@ -86,7 +104,7 @@ const Navbar = ({ activeTab, setActiveTab, onOpenAddModal }) => {
           </div>
         </div>
 
-        {/* Right side controls: Offline Badge, Month Selector, Currency & Add CTA */}
+        {/* Right side controls: Offline Badge, Month Selector, Currency, User Profile & Add CTA */}
         <div
           className="navbar-actions"
           style={{
@@ -152,6 +170,126 @@ const Navbar = ({ activeTab, setActiveTab, onOpenAddModal }) => {
 
           {/* Currency Switcher */}
           <CurrencySelector />
+
+          {/* User Profile / Auth CTA */}
+          {user ? (
+            <div style={{ position: 'relative' }} ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="btn btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  padding: '0.35rem 0.65rem',
+                  borderRadius: 'var(--radius-full)',
+                }}
+              >
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      background: 'var(--color-accent)',
+                      color: '#fff',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {user.name?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                )}
+                <span style={{ fontSize: '0.825rem', fontWeight: 600, maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {user.name?.split(' ')[0]}
+                </span>
+                <ChevronDown size={14} style={{ opacity: 0.7 }} />
+              </button>
+
+              {userDropdownOpen && (
+                <div
+                  className="glass-card animate-fade-in"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    right: 0,
+                    zIndex: 1000,
+                    width: '220px',
+                    backgroundColor: '#0f172a',
+                    padding: '0.6rem',
+                    border: '1px solid var(--border-strong)',
+                    borderRadius: 'var(--radius-sm)',
+                    boxShadow: 'var(--shadow-lg)',
+                  }}
+                >
+                  <div style={{ padding: '0.4rem 0.5rem', borderBottom: '1px solid var(--border-subtle)', marginBottom: '0.4rem' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{user.name}</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {user.email}
+                    </div>
+                    <div
+                      style={{
+                        display: 'inline-block',
+                        marginTop: '0.3rem',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        padding: '0.1rem 0.4rem',
+                        borderRadius: 'var(--radius-full)',
+                        background: user.authProvider === 'google' ? 'rgba(66, 133, 244, 0.15)' : 'rgba(99, 102, 241, 0.15)',
+                        color: user.authProvider === 'google' ? '#60a5fa' : '#818cf8',
+                      }}
+                    >
+                      {user.authProvider === 'google' ? 'Google Account' : 'Email & Password'}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      logout();
+                      setUserDropdownOpen(false);
+                    }}
+                    className="btn btn-ghost"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'flex-start',
+                      gap: '0.5rem',
+                      padding: '0.45rem 0.6rem',
+                      color: 'var(--color-expense)',
+                      fontSize: '0.825rem',
+                    }}
+                  >
+                    <LogOut size={15} />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuthModal}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.45rem 0.85rem',
+                fontSize: '0.825rem',
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <LogIn size={15} />
+              <span>Sign In</span>
+            </button>
+          )}
 
           {/* Add Entry CTA */}
           <button
